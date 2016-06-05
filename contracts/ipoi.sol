@@ -55,7 +55,13 @@ contract Idea {
 
   // Declare event structure
   event MajorEvent(uint256 logTimeStamp, uint256 eventTimeStamp, bytes32 indexed name, bytes32 indexed description);
-
+  
+  function destroy() {
+    if (msg.sender == owner) {
+      suicide(owner); // send any funds to owner
+    }
+  }
+  
   // This function gets executed if a transaction with invalid data is sent to
   // the contract or just ether without data. We revert the send so that no-one
   // accidentally loses money when using the contract.
