@@ -1,0 +1,10 @@
+{
+  "name": "hashtagplus",
+  "version": "1.0.0",
+  "dependencies": {
+    "bootstrap": "latest",
+    "font-awesome": "latest",
+    "jQuery": "latest",
+    "web3": "^0.16.0"
+  }
+}
