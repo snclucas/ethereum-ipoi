@@ -1,8 +1,7 @@
-
 contract IPOI {
 
   struct Idea {
-    uint id;
+    uint32 id;
     address owner;
     address[] parties;
     uint256 date;
@@ -11,10 +10,12 @@ contract IPOI {
   }
 
   //Declares a state variable 'numIdeaId'
-  uint numIdeaId;
+  uint32 numIdeaId;
   //Creates a mapping of Idea datatypes
   mapping(uint => Idea) ideas;
-
+  
+  mapping(address => uint32[]) ownerIdeas;
+ 
   // Owner
   address public owner;
   
@@ -28,12 +29,12 @@ contract IPOI {
   }
   
   function changeContractFee(uint newFee) onlyowner {
-    fee =  newFee;
+    fee = newFee;
   }
 
   // Create initial idea contract
-  function createIdea(address ideaOwner, address[] partiesEntry, string descriptionEntry) onlyowner returns(uint ideaId) {
-
+  function createIdea(address ideaOwner, address[] partiesEntry, string descriptionEntry) onlyowner returns(uint32 ideaId) {
+    
     if (msg.value >= fee) {
 
       if (msg.value > fee) {
@@ -42,6 +43,7 @@ contract IPOI {
 
       ideaId = numIdeaId++;
       Idea idea = ideas[ideaId];
+      ownerIdeas[ideaOwner].push(ideaId);
       idea.id = ideaId;
       idea.owner = ideaOwner;
 
@@ -52,20 +54,15 @@ contract IPOI {
       idea.date = now;
       idea.description = descriptionEntry;
 
-      IdeaChangeEvent(idea.date, "IPOI Contract Creation", descriptionEntry);
+      IdeaChangeEvent(idea.date, "IPOI Contract Creation", bytes(descriptionEntry));
     }
   }
   
-  /* Wrong
-  function getIdeasForOwner(address owner) returns(uint[] ideaRet) {
-      uint[] storage ideaReturn;
-      for(uint i=0;i<=numIdeaId;i++) {
-          if(ideas[numIdeaId].owner == owner)
-            ideaReturn.push(ideas[numIdeaId].id);
-      }
-    return ideaReturn;
+  
+  function getIdea(address ideaOwner) returns(uint32[]) {
+    return ownerIdeas[ideaOwner];
   }
-  */
+  
    
   function getIdeaDate(uint ideaId) returns(uint ideaDate) {
     return ideas[ideaId].date;
@@ -92,7 +89,7 @@ contract IPOI {
 
 
   // Declare event structure
-  event IdeaChangeEvent(uint256 date, string indexed name, string indexed description);
+  event IdeaChangeEvent(uint256 date, bytes indexed name, bytes indexed description);
 
   function destroy() {
     if (msg.sender == owner) {
