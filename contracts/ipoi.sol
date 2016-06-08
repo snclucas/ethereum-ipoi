@@ -5,6 +5,7 @@ contract IPOI {
   }
 
   struct Idea {
+    address owner;
     /* Array of parties involved in the idea */
     mapping(uint => Party) parties;
     /* Date stamp */
@@ -14,20 +15,22 @@ contract IPOI {
     /* Digital document hash */
     bytes proofDoc;
   }
-  
-  //Declares a state variable 'numCampaigns'
+
+  //Declares a state variable 'numIdeaId'
   uint numIdeaId;
-  //Creates a mapping of Campaign datatypes
+  //Creates a mapping of Idea datatypes
   mapping(uint => Idea) ideas;
-  
+
   // Owner
   address public owner;
+  
+  // Fee to use the service
+  uint public fee;
 
-
-
-  //Set Owner
-  function IPOI() {
+  //Set owner and fee
+  function IPOI(uint feeParam) {
     owner = msg.sender;
+    fee = feeParam;
   }
 
   modifier onlyowner() {
@@ -35,20 +38,31 @@ contract IPOI {
       _
   }
 
+
   // Create initial idea contract
-  function createIdea(address[] partiesEntry, bytes32 descriptionEntry) onlyowner returns (uint ideaId) {
-    ideaId = numIdeaId++; 
-    Idea idea = ideas[ideaId]; 
-        
-    for (uint i = 0; i < partiesEntry.length; i++) {
-      idea.parties[i].addr = partiesEntry[i];
+  function createIdea(address ideaOwner, address[] partiesEntry, bytes32 descriptionEntry) onlyowner returns(uint ideaId) {
+
+    if (msg.value >= fee) {
+
+      if (msg.value > fee) {
+        msg.sender.send(msg.value - fee); //payed more than required => refund
+      }
+
+      ideaId = numIdeaId++;
+      Idea idea = ideas[ideaId];
+
+      idea.owner = ideaOwner;
+
+      for (uint i = 0; i < partiesEntry.length; i++) {
+        idea.parties[i].addr = partiesEntry[i];
+      }
+
+      idea.date = now;
+      idea.description = descriptionEntry;
+      bytes32 name = "IPOI Contract Creation";
+
+      majorEventFunc(idea.date, name, descriptionEntry);
     }
-
-    idea.date = now;
-    idea.description = descriptionEntry;
-    bytes32 name = "IPOI Contract Creation";
-
-    majorEventFunc(idea.date, name, descriptionEntry);
   }
 
   function getOwner() returns(address owner) {
@@ -83,4 +97,3 @@ contract IPOI {
     throw;
   }
 }
-

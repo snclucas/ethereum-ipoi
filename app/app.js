@@ -13,6 +13,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs'); // set up ejs for templating
 
+app.use(express.static(__dirname + '/public'));
+
 require('./routes/routes.js')(app);
 
 app.listen(3000, function () {
