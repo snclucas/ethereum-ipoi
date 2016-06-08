@@ -1,18 +1,12 @@
+
 contract IPOI {
 
-  struct Party {
-    address addr;
-  }
-
   struct Idea {
+    uint id;
     address owner;
-    /* Array of parties involved in the idea */
-    mapping(uint => Party) parties;
-    /* Date stamp */
+    address[] parties;
     uint256 date;
-    /* Idea description */
-    bytes32 description;
-    /* Digital document hash */
+    string description;
     bytes proofDoc;
   }
 
@@ -32,15 +26,13 @@ contract IPOI {
     owner = msg.sender;
     fee = feeParam;
   }
-
-  modifier onlyowner() {
-    if (msg.sender == owner)
-      _
+  
+  function changeContractFee(uint newFee) onlyowner {
+    fee =  newFee;
   }
 
-
   // Create initial idea contract
-  function createIdea(address ideaOwner, address[] partiesEntry, bytes32 descriptionEntry) onlyowner returns(uint ideaId) {
+  function createIdea(address ideaOwner, address[] partiesEntry, string descriptionEntry) onlyowner returns(uint ideaId) {
 
     if (msg.value >= fee) {
 
@@ -50,44 +42,67 @@ contract IPOI {
 
       ideaId = numIdeaId++;
       Idea idea = ideas[ideaId];
-
+      idea.id = ideaId;
       idea.owner = ideaOwner;
 
       for (uint i = 0; i < partiesEntry.length; i++) {
-        idea.parties[i].addr = partiesEntry[i];
+        idea.parties.push(partiesEntry[i]); 
       }
 
       idea.date = now;
       idea.description = descriptionEntry;
-      bytes32 name = "IPOI Contract Creation";
 
-      majorEventFunc(idea.date, name, descriptionEntry);
+      IdeaChangeEvent(idea.date, "IPOI Contract Creation", descriptionEntry);
     }
   }
+  
+  /* Wrong
+  function getIdeasForOwner(address owner) returns(uint[] ideaRet) {
+      uint[] storage ideaReturn;
+      for(uint i=0;i<=numIdeaId;i++) {
+          if(ideas[numIdeaId].owner == owner)
+            ideaReturn.push(ideas[numIdeaId].id);
+      }
+    return ideaReturn;
+  }
+  */
+   
+  function getIdeaDate(uint ideaId) returns(uint ideaDate) {
+    return ideas[ideaId].date;
+  }
+  
+  function getIdeaDescription(uint ideaId) returns(string ideaDescription) {
+    return ideas[ideaId].description;
+  }
 
+  function getIdeaParties(uint ideaId) returns(address[] ideaParties) {
+    return ideas[ideaId].parties;
+  }
+  
   function getOwner() returns(address owner) {
     return owner;
   }
-
+  
 
   // Upload documentation for proof of idea (signed signatures?)
   function ideaProofDocument(bytes IPOIProofHash, uint ideaId) onlyowner {
     ideas[ideaId].proofDoc = IPOIProofHash;
-    majorEventFunc(block.timestamp, "Entered Idea Proof Document", "Idea proof in IPFS");
+    IdeaChangeEvent(block.timestamp, "Entered Idea Proof Document", "Idea proof in IPFS");
   }
 
-  // Log major life events
-  function majorEventFunc(uint256 eventTimeStamp, bytes32 name, bytes32 description) {
-    MajorEvent(block.timestamp, eventTimeStamp, name, description);
-  }
 
   // Declare event structure
-  event MajorEvent(uint256 logTimeStamp, uint256 eventTimeStamp, bytes32 indexed name, bytes32 indexed description);
+  event IdeaChangeEvent(uint256 date, string indexed name, string indexed description);
 
   function destroy() {
     if (msg.sender == owner) {
       suicide(owner); // send any funds to owner
     }
+  }
+  
+  modifier onlyowner() {
+    if (msg.sender == owner)
+      _
   }
 
   // This function gets executed if a transaction with invalid data is sent to
