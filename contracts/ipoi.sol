@@ -58,12 +58,10 @@ contract IPOI {
     }
   }
   
-  
   function getIdea(address ideaOwner) returns(uint32[]) {
     return ownerIdeas[ideaOwner];
   }
   
-   
   function getIdeaDate(uint ideaId) returns(uint ideaDate) {
     return ideas[ideaId].date;
   }
@@ -80,13 +78,12 @@ contract IPOI {
     return owner;
   }
   
-
+  
   // Upload documentation for proof of idea (signed signatures?)
   function ideaProofDocument(bytes IPOIProofHash, uint ideaId) onlyowner {
     ideas[ideaId].proofDoc = IPOIProofHash;
     IdeaChangeEvent(block.timestamp, "Entered Idea Proof Document", "Idea proof in IPFS");
   }
-
 
   // Declare event structure
   event IdeaChangeEvent(uint256 date, bytes indexed name, bytes indexed description);
