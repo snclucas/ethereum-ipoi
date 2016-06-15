@@ -1,5 +1,5 @@
 contract IPOI {
-
+  // Idea object
   struct Idea {
     uint32 id;
     address owner;
@@ -9,13 +9,15 @@ contract IPOI {
     bytes proofDoc;
   }
 
-  //Declares a state variable 'numIdeaId'
+  // State variable to hold ID of next idea
   uint32 numIdeaId;
-  //Creates a mapping of Idea datatypes
+  
+  //Mapping of Idea datatypes
   mapping(uint => Idea) ideas;
   
+  // Maps owner to their ideas
   mapping(address => uint32[]) ownerIdeas;
- 
+  
   // Owner
   address public owner;
   
@@ -28,6 +30,7 @@ contract IPOI {
     fee = feeParam;
   }
   
+  // Change contract fee
   function changeContractFee(uint newFee) onlyowner {
     fee = newFee;
   }
@@ -58,22 +61,27 @@ contract IPOI {
     }
   }
   
+  // Get idea by the address owner dadress
   function getIdea(address ideaOwner) returns(uint32[]) {
     return ownerIdeas[ideaOwner];
   }
   
+  // Get idea date by ID
   function getIdeaDate(uint ideaId) returns(uint ideaDate) {
     return ideas[ideaId].date;
   }
   
+  // Get idea description by ID
   function getIdeaDescription(uint ideaId) returns(string ideaDescription) {
     return ideas[ideaId].description;
   }
 
+  // Get idea parties by ID
   function getIdeaParties(uint ideaId) returns(address[] ideaParties) {
     return ideas[ideaId].parties;
   }
   
+  // Get owner of contract
   function getOwner() returns(address owner) {
     return owner;
   }
